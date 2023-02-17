@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <nav class="navbar bg-body-tertiary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">
+                        <h2 class="fst-italic"><img src="/logo.png" alt="Logo" width="40" height="44">
+                              Contacts List
+                        </h2>
+                    </a>
+                </div>
+            </nav>
+            <div class="container-fluid">
+
+            </div>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary border-top">
+                <div class="container-fluid">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="btn btn-light" role="button" href="/contact_add_page">Add Contact</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-light" role="button" href="/load_contacts_from_json_page">Import Contacts</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-light" role="button" id="delete_contact" href="#">Delete Contact</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-light" role="button" href="/group_add_page">Add Group</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-light" role="button" href="/reset">Reset</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="btn btn-light dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false"> Show Group
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/">Default</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li th:each="group:${groups}">
+                                        <a class="dropdown-item" th:href="@{/group/{g}(g=${group.id})}"
+                                           th:text="${group.name}"/>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="btn btn-light dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false"> Delete Group
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li th:each="group:${groups}">
+                                        <a class="dropdown-item" th:href="@{/group/delete(groupId=${group.id})}"
+                                           th:text="${group.name}"/>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <form class="d-flex" role="search" action="/search" method="post">
+                            <input class="form-control me-2" type="search" name="pattern" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-success" type="submit">Search</button>
+                        </form>
+                    </div>
+                </div>
+            </nav>
+
+            <table class="table table-light table-striped">
+                <thead>
+                <tr>
+                    <td></td>
+                    <td><b>Name</b></td>
+                    <td><b>Surname</b></td>
+                    <td><b>Phone</b></td>
+                    <td><b>E-mail</b></td>
+                    <td><b>Group</b></td>
+                </tr>
+                </thead>
+                <tr th:each="contact: ${contacts}">
+                    <td><input class="form-check-input mt-0" type="checkbox" name="toDelete[]"
+                               th:value="${contact.id}" th:id="checkbox_+${contact.id}"/></td>
+
+                    <td th:text="${contact.name}"/>
+                    <td th:text="${contact.surname}"/>
+                    <td th:text="${contact.phone}"/>
+                    <td th:text="${contact.email}"/>
+                    <td th:text="${contact.group} != null ? ${contact.group.name} : 'Default'"/>
+                </tr>
+            </table>
+            <nav aria-label="Page navigation example" th:if="${allPages!= null}">
+                <ul class="pagination">
+                    <li class="page-item" th:each="page, iter: ${allPages}">
+                        <a class="btn btn-light" th:href="@{/(page=${iter.index})}"
+                           th:text="${iter.count}" />
+                    </li>
+                </ul>
+            </nav>
+
+
+        </div>
+        <script>
+            $('#delete_contact').click(function(){
+                var data = { 'toDelete[]' : []};
+                $(":checked").each(function() {
+                    data['toDelete[]'].push($(this).val());
+                });
+                $.post("/contact/delete", data, function(data, status) {
+                    window.location.reload();
+                });
+            });
+
+        </script>
+    </body>
+</html>
